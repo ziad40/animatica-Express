@@ -32,8 +32,12 @@ exports.login = async (req, res) => {
     }
     try {
         const user = await User.findOne({ email });
+        if (!user) {
+            await bcrypt.compare(password, ""); // Dummy compare to mitigate timing attacks
+            return res.status(400).json({ msg: 'Invalid credentials' });
+        }
         const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch || !user) {
+        if (!isMatch) {
             return res.status(400).json({ msg: 'Invalid credentials' });
         }
         const payload = { user: { id: user._id , username : user.name} };
