@@ -1,0 +1,37 @@
+{
+  "name": "animatica-express",
+  "version": "1.0.0",
+  "description": "animatica backend for handling students scores, reports, question generation, solving questions, and correction",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ziad40/animatica-Express.git"
+  },
+  "keywords": [
+    "Express",
+    "node",
+    "backend",
+    "mongo"
+  ],
+  "author": "ziad abuelkher",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ziad40/animatica-Express/issues"
+  },
+  "homepage": "https://github.com/ziad40/animatica-Express#readme",
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.19.1",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0"
+  }
+}
