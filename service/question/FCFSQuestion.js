@@ -18,11 +18,15 @@ class FCFSQuestion extends Question {
 
   solve() {
     // Solve the FCFS scheduling problem instance
-    const { processes } = this.problemInstance;
-    const numProcesses = processes.length;
+    const numProcesses = this.problemInstance.processes.length;
     let totalWaitingTime = 0;
     // Sort processes by arrival time
-    processes.sort((a, b) => a.arrivalTime - b.arrivalTime);
+    const processes = [...this.problemInstance.processes].sort((a, b) => {
+      if (a.arrivalTime === b.arrivalTime) {
+        return a.id - b.id; // keep order by id if arrivalTime is same
+      }
+      return a.arrivalTime - b.arrivalTime;
+    });
     let currentTime = 0;
     const schedule = [];
     for (const process of processes) {
