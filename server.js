@@ -1,9 +1,23 @@
 const express = require('express');
 const connectDB = require('./config/db');
+const cors = require('cors');
+const allowedOrigins = ["http://localhost:5173", "https://myapp.com"];
+
 require('dotenv').config();
 const app = express();
 app.use(express.json());
 
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+  })
+);
 // Include route files
 const usersRoute = require('./routes/users');
 const authRoute = require('./routes/auth');
