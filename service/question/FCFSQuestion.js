@@ -29,17 +29,19 @@ class FCFSQuestion extends Question {
     });
     let currentTime = 0;
     const schedule = [];
+    const waitingTimes = []
     for (const process of processes) {
       if (currentTime < process.arrivalTime) {
         currentTime = process.arrivalTime; // CPU is idle until the process arrives
       }
       const waitingTime = currentTime - process.arrivalTime;
       totalWaitingTime += waitingTime;
-      schedule.push({ processId: process.id, startTime: currentTime, endTime: currentTime + process.burstTime, waitingTime: waitingTime });
+      schedule.push({ processId: process.id, startTime: currentTime, endTime: currentTime + process.burstTime });
+      waitingTimes.push({ processId: process.id, waitingTime: waitingTime });
       currentTime += process.burstTime;
     }
     const averageWaitingTime = totalWaitingTime / numProcesses;
-    return {schedule, averageWaitingTime};
+    return {schedule, waitingTimes, averageWaitingTime};
   }
 }
 
