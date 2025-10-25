@@ -32,11 +32,12 @@ class FCFSQuestion extends Question {
     const waitingTimes = []
     for (const process of processes) {
       if (currentTime < process.arrivalTime) {
+        schedule.push({ processId: -1, timeUnits: process.arrivalTime - currentTime });
         currentTime = process.arrivalTime; // CPU is idle until the process arrives
       }
       const waitingTime = currentTime - process.arrivalTime;
       totalWaitingTime += waitingTime;
-      schedule.push({ processId: process.id, startTime: currentTime, endTime: currentTime + process.burstTime });
+      schedule.push({ processId: process.id, timeUnits : process.burstTime });
       waitingTimes.push({ processId: process.id, waitingTime: waitingTime });
       currentTime += process.burstTime;
     }
