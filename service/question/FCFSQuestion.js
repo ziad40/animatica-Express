@@ -29,7 +29,7 @@ class FCFSQuestion extends Question {
     });
     let currentTime = 0;
     const schedule = [];
-    const waitingTimes = []
+    const waitingTimes = new Map();
     for (const process of processes) {
       if (currentTime < process.arrivalTime) {
         schedule.push({ processId: -1, timeUnits: process.arrivalTime - currentTime });
@@ -38,11 +38,11 @@ class FCFSQuestion extends Question {
       const waitingTime = currentTime - process.arrivalTime;
       totalWaitingTime += waitingTime;
       schedule.push({ processId: process.id, timeUnits : process.burstTime });
-      waitingTimes.push({ processId: process.id, waitingTime: waitingTime });
+      waitingTimes.set(process.id, waitingTime);
       currentTime += process.burstTime;
     }
     const averageWaitingTime = totalWaitingTime / numProcesses;
-    return {schedule, waitingTimes, averageWaitingTime};
+    return {schedule, waitingTimes: Object.fromEntries(waitingTimes), averageWaitingTime};
   }
 }
 
