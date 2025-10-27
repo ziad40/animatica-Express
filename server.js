@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const connectDB = require('./config/db');
 const cors = require('cors');
 // Whitelist for production. In development we'll allow the LAN origins so mobile devices
