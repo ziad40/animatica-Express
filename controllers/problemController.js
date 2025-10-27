@@ -38,15 +38,19 @@ exports.validateSolution = async (req, res) => {
             return res.status(404).json({ error: 'Question not found' });
         }
     } else {
-        // ensure we derive type from the provided question body
-        const questionType = (questionBody.type || '').toLowerCase();
-        questionDoc = new Question({
-            type: questionType,
-            question: questionBody.question,
-            solution: questionBody.solution
-        });
-        await questionDoc.save();
-        resolvedQuestionId = questionDoc._id;
+        try {
+            // ensure we derive type from the provided question body
+            const questionType = (questionBody.type || '').toLowerCase();
+            questionDoc = new Question({
+                type: questionType,
+                question: questionBody.question,
+                solution: questionBody.solution
+            });
+            await questionDoc.save();
+            resolvedQuestionId = questionDoc._id;
+        } catch(err){
+            return res.status(400).json({ error: 'Invalid question body' });
+        }
     }
 
     let schduleScore = 0;
@@ -90,14 +94,19 @@ exports.validateSolution = async (req, res) => {
             total: 1
         }
     }
-    // record attempt in database
-    const questionAttempt = new Attempt({
-        userId: req.user.id,
-        question: resolvedQuestionId,
-        trialAnswer: trialAnswer,
-        score: score
-    });
-    await questionAttempt.save();
+    try{
+        // record attempt in database
+        const questionAttempt = new Attempt({
+            userId: req.user.id,
+            question: resolvedQuestionId,
+            trialAnswer: trialAnswer,
+            score: score
+        });
+        await questionAttempt.save();
+    }catch(err){
+        return res.status(500).json({ error: `Failed to record attempt with error ${err}` });
+    }
+    
     res.status(200).json({problemId : resolvedQuestionId, score });
 };
 

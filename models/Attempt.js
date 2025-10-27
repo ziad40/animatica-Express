@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-// ...existing code...
 
 const AttemptSchema = new mongoose.Schema({
     userId : {
