@@ -12,22 +12,7 @@ app.use(express.json());
 // Allow CORS differently depending on environment:
 // - production: restrict to allowedOrigins
 // - development: allow any origin coming from the LAN (so mobile/dev can connect)
-if (process.env.NODE_ENV === 'PRO') {
-  app.use(
-    cors({
-      origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) {
-          callback(null, true);
-        } else {
-          callback(new Error('Not allowed by CORS'));
-        }
-      },
-      credentials: true,
-    })
-  );
-} else {
-  // Development: reflect the request origin (allows mobile devices on same network).
-  // This sets Access-Control-Allow-Origin to the request Origin.
+if (process.env.NODE_ENV !== 'PRO') {
   app.use(
     cors({
       origin: true,
@@ -35,6 +20,7 @@ if (process.env.NODE_ENV === 'PRO') {
     })
   );
 }
+
 // Include route files
 const usersRoute = require('./routes/users');
 const authRoute = require('./routes/auth');
@@ -44,10 +30,10 @@ const problemRoute = require('./routes/problem');
 app.use('/api/users', usersRoute);
 app.use('/api/auth', authRoute);
 app.use('/api/problem', problemRoute)
-
-app.get('/', (req, res) => {
-    res.send('<h1>Hello, Express.js Server!</h1>');
-});
+app.use(express.static(path.join(__dirname, 'client', 'build')));
+app.get('*', (req, res) =>
+  res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'))
+);
 
 connectDB();
 
