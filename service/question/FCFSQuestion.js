@@ -4,7 +4,7 @@ class FCFSQuestion extends Question {
   generate() {
     // Generate a FCFS scheduling problem instance
     // first step : generate random number of processes between 3 and 10
-    const numProcesses = Math.floor(Math.random() * 1) + 3;
+    const numProcesses = Math.floor(Math.random() * 8) + 3;
     // second step : generate random processes with arrival time and burst time
     const processes = [];
     for (let i = 0; i < numProcesses; i++) {
