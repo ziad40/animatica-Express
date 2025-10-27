@@ -32,7 +32,7 @@ app.use('/api/users', usersRoute);
 app.use('/api/auth', authRoute);
 app.use('/api/problem', problemRoute)
 app.use(express.static(path.join(__dirname, 'client', 'build')));
-app.get('*', (req, res) =>
+app.get(/.*/, (req, res) =>
   res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'))
 );
 
