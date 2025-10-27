@@ -31,9 +31,9 @@ const problemRoute = require('./routes/problem');
 app.use('/api/users', usersRoute);
 app.use('/api/auth', authRoute);
 app.use('/api/problem', problemRoute)
-app.use(express.static(path.join(__dirname, 'client', 'build')));
+app.use(express.static(path.join(__dirname, 'client', 'dist')));
 app.get(/.*/, (req, res) =>
-  res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'))
+  res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'))
 );
 
 connectDB();
