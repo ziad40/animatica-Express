@@ -6,7 +6,7 @@ const QuestionSchema = new mongoose.Schema({
         required: true,
         enum: ["fcfs"]
     },
-    content: {
+    question: {
         type: mongoose.Schema.Types.Mixed,
         required: true,
         trim: true,
@@ -15,14 +15,10 @@ const QuestionSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.Mixed,
         required: true,
     },
-    metadata: {
-    difficulty: { type: String, enum: ["easy", "medium", "hard"], default: "easy" },
-    tags: [{ type: String }]
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  }
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
 });
 
 module.exports = mongoose.model('Question', QuestionSchema);

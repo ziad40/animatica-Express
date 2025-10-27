@@ -6,7 +6,7 @@ const router = express.Router();
 router.use(authMiddleware); // Apply the middleware to all routes in this router
 // Define a route
 router.get('/', (req, res) => {
-    res.send('this is user route');// this gets executed when user visit http://localhost:3000/user
+    res.send(`this is user route ${req.user.id}`);// this gets executed when user visit http://localhost:3000/user
 });
 
 router.get('/101', (req, res) => {
