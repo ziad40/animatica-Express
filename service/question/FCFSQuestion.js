@@ -24,7 +24,7 @@ class FCFSQuestion extends Question {
     processArrivalTimes.sort((a, b) => a - b); // sort arrival times
     for (let i = 0; i < numProcesses; i++) {
       const arrivalTime = processArrivalTimes[i];
-      const burstTime = Math.floor(Math.random() * 12) + 2; // Burst time between 2 and 10
+      const burstTime = Math.floor(Math.random() * 10) + 2; // Burst time between 2 and 10
       processes.push({ id: i + 1, arrivalTime: arrivalTime, burstTime: burstTime });
     }
     this.problemInstance = { processes };
