@@ -3,13 +3,24 @@ const { Question } = require("./Question.js");
 class FCFSQuestion extends Question {
   generate() {
     // Generate a FCFS scheduling problem instance
-    // first step : generate random number of processes between 3 and 10
-    const numProcesses = Math.floor(Math.random() * 8) + 3;
+    // first step : generate random number of processes between 3 and 5
+    const numProcesses = Math.floor(Math.random() * 3) + 3;
     // second step : generate random processes with arrival time and burst time
     const processes = [];
+    const arr = [];
+    for (let i = 0; i <= 6; i++) {
+      arr.push(i);
+    }
+    const arrivalTimesSet = new Set(arr);
     for (let i = 0; i < numProcesses; i++) {
-      const arrivalTime = Math.floor(Math.random() * 10); // Arrival time between 0 and 9
-      const burstTime = Math.floor(Math.random() * 10) + 1; // Burst time between 1 and 10
+      // Arrival time between 0 and 9 and arrival time for each process should be unique
+      const randomIndex = Math.floor(Math.random() * arrivalTimesSet.size);
+      const arrivalTime = Array.from(arrivalTimesSet)[randomIndex];
+
+      // remove that value from the Set to keep it unique
+      arrivalTimesSet.delete(arrivalTime);
+
+      const burstTime = Math.floor(Math.random() * 12) + 2; // Burst time between 2 and 10
       processes.push({ id: i + 1, arrivalTime: arrivalTime, burstTime: burstTime });
     }
     this.problemInstance = { processes };
