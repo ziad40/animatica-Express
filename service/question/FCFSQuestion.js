@@ -8,6 +8,7 @@ class FCFSQuestion extends Question {
     // second step : generate random processes with arrival time and burst time
     const processes = [];
     const arr = [];
+    const processArrivalTimes = [];
     for (let i = 0; i <= 6; i++) {
       arr.push(i);
     }
@@ -16,10 +17,13 @@ class FCFSQuestion extends Question {
       // Arrival time between 0 and 9 and arrival time for each process should be unique
       const randomIndex = Math.floor(Math.random() * arrivalTimesSet.size);
       const arrivalTime = Array.from(arrivalTimesSet)[randomIndex];
-
+      processArrivalTimes.push(arrivalTime);
       // remove that value from the Set to keep it unique
       arrivalTimesSet.delete(arrivalTime);
-
+    }
+    processArrivalTimes.sort((a, b) => a - b); // sort arrival times
+    for (let i = 0; i < numProcesses; i++) {
+      const arrivalTime = processArrivalTimes[i];
       const burstTime = Math.floor(Math.random() * 12) + 2; // Burst time between 2 and 10
       processes.push({ id: i + 1, arrivalTime: arrivalTime, burstTime: burstTime });
     }
