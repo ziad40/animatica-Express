@@ -55,9 +55,11 @@ exports.validateSolution = async (req, res) => {
 
     let schduleScore = 0;
     let waitingTimesScore = 0;
+    let operationsScore = 0;
     let averageWaitingTimeScore = 0;
     const totalSchduleScore = questionDoc.solution.schedule.length;
     const totalWaitingTimesScore = Object.keys(questionDoc.solution.waitingTimes).length;
+    const totalOperationsScore = Object.keys(questionDoc.solution.operations).length;
     // Calculate schedule score by looping throuth each element and if {processId, timeUnits} matches increase score by 1 and order matters
     for (let i = 0; i < questionDoc.solution.schedule.length; i++) {
         if (i >= trialAnswer.scheduledProcesses.length) {
@@ -75,6 +77,15 @@ exports.validateSolution = async (req, res) => {
             waitingTimesScore++;
         }
     }
+    for (const processId in questionDoc.solution.operations) {
+        if (Object.prototype.hasOwnProperty.call(trialAnswer.operations, processId)){
+            const trimmedTrialOp = String(trialAnswer.operations[processId]).trim();
+            const trimmedSolutionOp = String(questionDoc.solution.operations[processId]).trim();
+            if(trimmedTrialOp === trimmedSolutionOp || (trimmedSolutionOp === "0" && trimmedTrialOp === "")){
+                operationsScore++;
+            }
+        }
+    }
     // Calculate average waiting time score
     const tolerance = 0.01; // Allow a small tolerance for floating point comparison
     if (Math.abs(questionDoc.solution.averageWaitingTime - trialAnswer.averageWaitingTime) <= tolerance) {
@@ -84,6 +95,10 @@ exports.validateSolution = async (req, res) => {
         schedule: {
             score: schduleScore,
             total: totalSchduleScore
+        },
+        operations : {
+            score : operationsScore,
+            total : totalOperationsScore
         },
         waitingTimes: {
             score: waitingTimesScore,

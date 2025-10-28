@@ -45,19 +45,22 @@ class FCFSQuestion extends Question {
     let currentTime = 0;
     const schedule = [];
     const waitingTimes = new Map();
+    const operations = new Map();
     for (const process of processes) {
       if (currentTime < process.arrivalTime) {
         schedule.push({ processId: -1, timeUnits: process.arrivalTime - currentTime });
         currentTime = process.arrivalTime; // CPU is idle until the process arrives
       }
       const waitingTime = currentTime - process.arrivalTime;
+      const ops = waitingTime != 0 ? `${currentTime}-${process.arrivalTime}` : "0";
       totalWaitingTime += waitingTime;
       schedule.push({ processId: process.id, timeUnits : process.burstTime });
       waitingTimes.set(process.id, waitingTime);
+      operations.set(process.id, ops);
       currentTime += process.burstTime;
     }
     const averageWaitingTime = totalWaitingTime / numProcesses;
-    return {schedule, waitingTimes: Object.fromEntries(waitingTimes), averageWaitingTime};
+    return {schedule,operations : Object.fromEntries(operations), waitingTimes: Object.fromEntries(waitingTimes), averageWaitingTime};
   }
 }
 
