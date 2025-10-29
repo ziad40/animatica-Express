@@ -52,7 +52,7 @@ class FCFSQuestion extends Question {
         currentTime = process.arrivalTime; // CPU is idle until the process arrives
       }
       const waitingTime = currentTime - process.arrivalTime;
-      const ops = waitingTime != 0 ? `${currentTime}-${process.arrivalTime}` : "0";
+      const ops = `${currentTime}-${process.arrivalTime}`;
       totalWaitingTime += waitingTime;
       schedule.push({ processId: process.id, timeUnits : process.burstTime });
       waitingTimes.set(process.id, waitingTime);
