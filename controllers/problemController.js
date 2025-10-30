@@ -78,8 +78,8 @@ exports.validateSolution = async (req, res) => {
     }
     for (const processId in questionDoc.solution.operations) {
         if (Object.prototype.hasOwnProperty.call(trialAnswer.operations, processId)){
-            const trimmedTrialOp = String(trialAnswer.operations[processId]).trim();
-            const trimmedSolutionOp = String(questionDoc.solution.operations[processId]).trim();
+            const trimmedTrialOp = String(trialAnswer.operations[processId]).replace(/\s+/g, '');
+            const trimmedSolutionOp = String(questionDoc.solution.operations[processId]).replace(/\s+/g, '');
             if(trimmedTrialOp === trimmedSolutionOp || (trimmedSolutionOp === "0" && trimmedTrialOp === "")){
                 operationsScore++;
             }
