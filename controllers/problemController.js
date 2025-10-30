@@ -2,7 +2,6 @@ const QuestionService = require('../service/QuestionService');
 const { UnsupportedProblemTypeError } = require("../error/UnsupportedProblemTypeError.js");
 const Question = require('../models/Question');
 const Attempt = require('../models/Attempt');
-const mongoose = require('mongoose');
 
 
 exports.getQuestion = async (req, res) => {

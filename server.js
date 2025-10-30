@@ -2,9 +2,6 @@ const express = require('express');
 const path = require('path');
 const connectDB = require('./config/db');
 const cors = require('cors');
-// Whitelist for production. In development we'll allow the LAN origins so mobile devices
-// on the same network can access the API. Keep production strict.
-const allowedOrigins = ["http://localhost:5173", "https://myapp.com"];
 
 require('dotenv').config();
 const app = express();
@@ -26,11 +23,14 @@ if (process.env.NODE_ENV !== 'PRO') {
 const usersRoute = require('./routes/users');
 const authRoute = require('./routes/auth');
 const problemRoute = require('./routes/problem');
+const botRoute = require('./routes/botAI');
+
 
 // Use routes
 app.use('/api/users', usersRoute);
 app.use('/api/auth', authRoute);
 app.use('/api/problem', problemRoute)
+app.use('/api/bot', botRoute);
 app.use(express.static(path.join(__dirname, 'client', 'dist')));
 app.get(/.*/, (req, res) =>
   res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'))
