@@ -14,16 +14,18 @@ exports.showHint = async (req, res) => {
     });
     try {
         const completion = await openaiClient.chat.completions.create({
-            model: 'openai/gpt-4o',
+            model: process.env.AI_MODEL,
             messages: [
                 {
                     role: 'user',
                     content: `I have a student who solved a ${type} CPU Scheduling problem. 
                                 Their answer is ${JSON.stringify(answer)}, 
                                 the correct solution is ${JSON.stringify(solution)}. 
-                                Please provide one and only one very short, simple hint — not the full answer.
+                                so according to correct solution if solution doesn't match correct solution , then provide one and only one very very short, 
+                                simple hint about mistake or incompletion — not the full answer. As I need to learn them with simple hints and instructions
+                                and if there are multiple mistakes, then show hint for only one mistake.
                                 and if answer and correct solution matches, then encourage them and give general hint about this Scheduling algorithm.
-                                I want respone to be declared as it will be forward directly to them without any updates I will do
+                                I want respone to be simple and short declared as it will be forward directly to them without any updates I will do, so I don't need response to me
                                 `
 
                 },
@@ -31,6 +33,6 @@ exports.showHint = async (req, res) => {
         });
         res.status(200).json(completion.choices[0].message);
     } catch (err) {
-        res.status(500).json({ error: "AI Server error" });
+        res.status(500).json({ error: "AI Server error " + err.message });
     }
 };
