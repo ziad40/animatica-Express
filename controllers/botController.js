@@ -1,4 +1,6 @@
 const { openaiClient } = require("../config/openaiClient");
+const resolveQuestion = require('../service/ResolveQuestion');
+const Conversation = require('../models/Conversation');
 
 
 exports.showHint = async (req, res) => {
@@ -32,6 +34,54 @@ exports.showHint = async (req, res) => {
             ],
         });
         res.status(200).json(completion.choices[0].message);
+    } catch (err) {
+        res.status(500).json({ error: "AI Server error " + err.message });
+    }
+};
+
+exports.askAnyThing = async (req, res) => {
+    const { questionId, question: questionBody, message } = req.body;
+    if (!message || (!questionId && !questionBody)) {
+        return res.status(400).json({ error: 'message is required and questionId or problem instance are required' });
+    }
+
+    // questionDoc will hold the resolved Question mongoose document
+    let { questionDoc, resolvedQuestionId } = await resolveQuestion.resolveQuestion(req, res, questionId, questionBody);
+    
+    let conversation = await Conversation.findOne({ userId: req.user.id, question: resolvedQuestionId });
+    if (!conversation) {
+        // If no conversation exists, create a new one
+        const newConversation = new Conversation({
+            userId: req.user.id,
+            question: resolvedQuestionId,
+            messages: [{
+                    role: 'user',
+                    content: `I currently solve a ${questionDoc.type} CPU Scheduling problem.
+                                question is ${JSON.stringify(questionDoc.question)}
+                                you should help me based on this context. and consider all messages as context but respond to last message only.
+                                and try to keep the response short and to the point.`
+                    }],
+        });
+        conversation = await newConversation.save();
+    }
+    const oldMessages = conversation ? conversation.messages : [];
+
+    const newMessage = {
+                    role: 'user',
+                    content: `${message}`
+                }
+    oldMessages.push(newMessage);
+    await conversation.updateOne({ $push: { messages: newMessage } });
+    const sanitizedMessages = oldMessages.map(msg => ({
+        role: msg.role,
+        content: msg.content,
+    }));
+    try {
+        const completion = await openaiClient.chat.completions.create({
+            model: process.env.AI_MODEL,
+            messages: sanitizedMessages,
+        });
+        res.status(200).json({problemId : resolvedQuestionId, response : completion.choices[0].message});
     } catch (err) {
         res.status(500).json({ error: "AI Server error " + err.message });
     }
