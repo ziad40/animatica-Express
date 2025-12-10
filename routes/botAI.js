@@ -8,6 +8,5 @@ router.use(authMiddleware); // Apply the middleware to all routes in this router
 // Define a route`
 router.post('/hint', showHint);
 router.post('/ask', askAnyThing);
-router.post('/generateAudio', showHint);
 
 module.exports = router;
