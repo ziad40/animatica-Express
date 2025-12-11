@@ -1,6 +1,5 @@
 const QuestionService = require('../service/QuestionService');
 const { UnsupportedProblemTypeError } = require("../error/UnsupportedProblemTypeError.js");
-const Question = require('../models/Question');
 const Attempt = require('../models/Attempt');
 const resolveQuestion = require('../service/ResolveQuestion');
 
@@ -87,13 +86,18 @@ exports.validateSolution = async (req, res) => {
             total: 1
         }
     }
+    const finalScore = (score.schedule.score / score.schedule.total) * 0.4 +
+        (score.waitingTimes.score / score.waitingTimes.total) * 0.3 +
+        (score.operations.score / score.operations.total) * 0.1 +
+        (score.averageWaitingTime.score / score.averageWaitingTime.total) * 0.2;
     try{
         // record attempt in database
         const questionAttempt = new Attempt({
             userId: req.user.id,
             question: resolvedQuestionId,
             trialAnswer: trialAnswer,
-            score: score
+            scoreCal: score,
+            score: finalScore
         });
         await questionAttempt.save();
     }catch(err){

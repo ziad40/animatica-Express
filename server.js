@@ -24,6 +24,8 @@ const usersRoute = require('./routes/users');
 const authRoute = require('./routes/auth');
 const problemRoute = require('./routes/problem');
 const botRoute = require('./routes/botAI');
+const studentHistoryRoute = require('./routes/student')
+const teacherRoute = require('./routes/teacher')
 
 
 // Use routes
@@ -31,6 +33,9 @@ app.use('/api/users', usersRoute);
 app.use('/api/auth', authRoute);
 app.use('/api/problem', problemRoute)
 app.use('/api/bot', botRoute);
+app.use('/api/students', studentHistoryRoute);
+app.use('/api/teacher/students', teacherRoute);
+
 app.use(express.static(path.join(__dirname, 'client', 'dist')));
 app.get(/.*/, (req, res) =>
   res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'))

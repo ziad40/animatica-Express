@@ -15,8 +15,12 @@ const AttemptSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.Mixed,
         required: true,
     },
-    score: {
+    scoreCal: {
         type: mongoose.Schema.Types.Mixed,
+        required: true,
+    },
+    score: {
+        type: Number,
         required: true,
     },
     createdAt: {

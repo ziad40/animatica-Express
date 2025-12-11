@@ -4,8 +4,8 @@ const jwt = require('jsonwebtoken');
 
 // Register a new user
 exports.register = async (req, res) => {
-    const { name, email, password } = req.body || {};
-    if (!name || !email || !password) {
+    const { name, email, password, role, fullName } = req.body || {};
+    if (!name || !email || !password || !fullName || !role) {
         return res.status(400).json({ msg: 'Please enter all fields' });
     }
     try {
@@ -13,8 +13,12 @@ exports.register = async (req, res) => {
         if (user) {
             return res.status(400).json({ msg: 'User already exists' });
         }
+        user = await User.findOne({ username: name });
+        if (user) {
+            return res.status(400).json({ msg: 'User already exists' });
+        }
 
-        user = new User({ name, email, password });
+        user = new User({ fullName, name, email, password, role });
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(password, salt);
         await user.save();
@@ -40,7 +44,7 @@ exports.login = async (req, res) => {
         if (!isMatch) {
             return res.status(400).json({ msg: 'Invalid credentials' });
         }
-        const payload = { user: { id: user._id , username : user.name} };
+        const payload = { user: { id: user._id , username : user.name, fullname : user.fullName, role: user.role} };
         jwt.sign(payload, process.env.JWT_SECRET, (err, token) => {
             if (err) throw err;
             res.json({ token });
