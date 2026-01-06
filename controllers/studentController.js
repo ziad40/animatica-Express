@@ -65,11 +65,15 @@ exports.studentAnalysis = async (req, res) => {
 
 exports.studentQuestionAnalysis = async (req, res) => {
     const { username, questionId } = req.params;
+    const student = await User.findOne({ name: username }).select('_id');
+    if (!student) {
+        return res.status(404).json({ error: 'Student not found' });
+    }
     if (!username || (req.user.role === "student" && username != req.user.username)) {
         return res.status(403).json({ error: 'Access denied' });
     }
     try {
-        const userObjectId = new mongoose.Types.ObjectId(req.user.id);
+        const userObjectId = student._id;
         const questionObjectId = new mongoose.Types.ObjectId(questionId);   
         const attemptsQuestionDetails = await Attempt.aggregate([
             { $match: { userId: userObjectId, question: questionObjectId } },
