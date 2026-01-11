@@ -4,8 +4,8 @@ const jwt = require('jsonwebtoken');
 
 // Register a new user
 exports.register = async (req, res) => {
-    const { name, email, password, role, fullName } = req.body || {};
-    if (!name || !email || !password || !fullName || !role) {
+    const { name, email, password, fullName } = req.body || {};
+    if (!name || !email || !password || !fullName) {
         return res.status(400).json({ msg: 'Please enter all fields' });
     }
     try {
@@ -18,7 +18,7 @@ exports.register = async (req, res) => {
             return res.status(400).json({ msg: 'User already exists' });
         }
 
-        user = new User({ fullName, name, email, password, role });
+        user = new User({ fullName, name, email, password });
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(password, salt);
         await user.save();
