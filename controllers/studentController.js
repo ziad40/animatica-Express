@@ -28,8 +28,10 @@ exports.studentAnalysis = async (req, res) => {
                 _id: '$questionDetails._id',
                 type: { $first: '$questionDetails.type' },
                 attempts: { $sum: 1 },
-                lastScore: { $first: '$score' }
+                lastScore: { $first: '$score' },
+                latestCreatedAt: { $first: "$createdAt" }
             }},
+            { $sort: { latestCreatedAt: -1 } },
         ]);
         const averageScores = await Attempt.aggregate([
             { $match: {userId : student._id}},
@@ -56,8 +58,21 @@ exports.studentAnalysis = async (req, res) => {
                     averageScore: 1
             }}
         ]);
+        
+        const progressRate = questionStats.reverse().map(qs => {
+            return{
+                type: qs.type,
+                score: qs.lastScore
+            }
+        }).reduce((acc, {type, score}) =>{
+            if (!acc[type]) {
+                acc[type] = []
+            }
+            acc[type].push(score);
+            return acc;
+        },{});
 
-        res.status(200).json({ questionStats, averageScores });
+        res.status(200).json({ questionStats, averageScores, progressRate });
     } catch (err) {
         res.status(500).json({ error: 'Server error' });
     }
@@ -90,6 +105,7 @@ exports.studentQuestionAnalysis = async (req, res) => {
                 score: 1,
                 createdAt: 1,
                 trialAnswer: 1,
+                time: 1,
                 questionDetails: {
                     _id: 1,
                     type: 1,
@@ -105,7 +121,8 @@ exports.studentQuestionAnalysis = async (req, res) => {
                         _id: '$_id',
                         score: '$score',
                         createdAt: '$createdAt',
-                        trialAnswer: '$trialAnswer'
+                        trialAnswer: '$trialAnswer',
+                        time: '$time'
                     }
                 }
             }}

@@ -22,7 +22,7 @@ exports.getQuestion = async (req, res) => {
 
 exports.validateSolution = async (req, res) => {
     // Avoid reassigning a const by renaming incoming question as questionBody
-    const { questionId, question: questionBody, trialAnswer } = req.body;
+    const { questionId, question: questionBody, trialAnswer, time } = req.body;
     if (!trialAnswer || (!questionId && !questionBody)) {
         return res.status(400).json({ error: 'trial answer is required and questionId or problem instance are required' });
     }
@@ -97,7 +97,8 @@ exports.validateSolution = async (req, res) => {
             question: resolvedQuestionId,
             trialAnswer: trialAnswer,
             scoreCal: score,
-            score: finalScore
+            score: finalScore,
+            time: time
         });
         await questionAttempt.save();
     }catch(err){
