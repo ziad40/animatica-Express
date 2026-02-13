@@ -27,7 +27,7 @@ class RoundRobinQuestion extends Question {
       processes.push({ id: i + 1, arrivalTime: arrivalTime, burstTime: burstTime });
     }
     
-    const timeQuantum = 3; // Fixed time quantum
+    const timeQuantum = Math.floor(Math.random() * 4) + 2; // Time quantum between 2 and 5
     this.problemInstance = { processes, timeQuantum };
     return this.problemInstance;
   }
@@ -38,77 +38,77 @@ class RoundRobinQuestion extends Question {
     const timeQuantum = this.problemInstance.timeQuantum;
     let totalWaitingTime = 0;
     
-    const processes = [...this.problemInstance.processes].map(p => ({
+    // Sort processes by arrival time
+    const processes = [...this.problemInstance.processes].sort((a, b) => {
+      if (a.arrivalTime === b.arrivalTime) {
+        return a.id - b.id;
+      }
+      return a.arrivalTime - b.arrivalTime;
+    }).map(p => ({
       ...p,
       remainingTime: p.burstTime,
-      completionTime: null
+      completionTime: null,
+      lastExecutionEndTime: null
     }));
     
     let currentTime = 0;
+    let processIndex = 0;
     const schedule = [];
     const waitingTimes = new Map();
     const operations = new Map();
     const completed = new Set();
     const queue = [];
     
-    // Add initial process times to operations map
+    // Initialize operations map
     processes.forEach(p => {
       operations.set(p.id, '');
     });
     
-    let processIndex = 0;
-    
     while (completed.size < numProcesses) {
-      // Add newly arrived processes to queue
+      // Add all processes that have arrived to the queue
       while (processIndex < processes.length && processes[processIndex].arrivalTime <= currentTime) {
-        if (!queue.some(p => p.id === processes[processIndex].id)) {
-          queue.push(processes[processIndex]);
-        }
+        queue.push(processes[processIndex]);
         processIndex++;
       }
       
       if (queue.length === 0) {
-        // No process in queue, jump to next arrival
+        // No process in queue, jump to next arrival time
         if (processIndex < processes.length) {
           const nextArrival = processes[processIndex].arrivalTime;
           schedule.push({ processId: -1, timeUnits: nextArrival - currentTime });
           currentTime = nextArrival;
-          queue.push(processes[processIndex]);
-          processIndex++;
         }
+        continue;
+      }
+      
+      // Execute process from queue
+      const process = queue.shift();
+      const timeToExecute = Math.min(timeQuantum, process.remainingTime);
+      
+      schedule.push({ processId: process.id, timeUnits: timeToExecute });
+      
+      // Calculate operations: store waiting gaps as start-end pairs
+      const lastTimeReference = process.lastExecutionEndTime === null ? process.arrivalTime : process.lastExecutionEndTime;
+      const opStr = operations.get(process.id);
+      const gapOperation = `${currentTime}-${lastTimeReference}`;
+      operations.set(process.id, opStr ? opStr + '+' + gapOperation : gapOperation);
+      
+      currentTime += timeToExecute;
+      process.remainingTime -= timeToExecute;
+      process.lastExecutionEndTime = currentTime;
+      
+      if (process.remainingTime > 0) {
+        // Process not completed, add back to queue
+        queue.push(process);
       } else {
-        const process = queue.shift();
-        const timeToExecute = Math.min(timeQuantum, process.remainingTime);
+        // Process completed
+        process.completionTime = currentTime;
+        completed.add(process.id);
         
-        schedule.push({ processId: process.id, timeUnits: timeToExecute });
-        
-        const opStr = operations.get(process.id);
-        operations.set(process.id, opStr ? opStr + ',' + currentTime : String(currentTime));
-        
-        currentTime += timeToExecute;
-        process.remainingTime -= timeToExecute;
-        
-        if (process.remainingTime > 0) {
-          // Process not completed, add back to queue
-          queue.push(process);
-        } else {
-          // Process completed
-          process.completionTime = currentTime;
-          completed.add(process.id);
-          
-          // Waiting Time = Completion Time - Arrival Time - Burst Time
-          const waitingTime = process.completionTime - process.arrivalTime - process.burstTime;
-          waitingTimes.set(process.id, Math.max(0, waitingTime));
-          totalWaitingTime += Math.max(0, waitingTime);
-        }
-        
-        // Add newly arrived processes to queue
-        while (processIndex < processes.length && processes[processIndex].arrivalTime <= currentTime) {
-          if (!queue.some(p => p.id === processes[processIndex].id) && !completed.has(processes[processIndex].id)) {
-            queue.push(processes[processIndex]);
-          }
-          processIndex++;
-        }
+        // Waiting Time = Completion Time - Arrival Time - Burst Time
+        const waitingTime = process.completionTime - process.arrivalTime - process.burstTime;
+        waitingTimes.set(process.id, Math.max(0, waitingTime));
+        totalWaitingTime += Math.max(0, waitingTime);
       }
     }
     

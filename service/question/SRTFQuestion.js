@@ -36,53 +36,94 @@ class SRTFQuestion extends Question {
     const numProcesses = this.problemInstance.processes.length;
     let totalWaitingTime = 0;
     
-    const processes = [...this.problemInstance.processes].map(p => ({
+    // Sort processes by arrival time
+    const processes = [...this.problemInstance.processes].sort((a, b) => {
+      if (a.arrivalTime === b.arrivalTime) {
+        return a.id - b.id;
+      }
+      return a.arrivalTime - b.arrivalTime;
+    }).map(p => ({
       ...p,
       remainingTime: p.burstTime,
       completionTime: null
     }));
     
     let currentTime = 0;
+    let processIndex = 0;
     const schedule = [];
     const waitingTimes = new Map();
     const operations = new Map();
     const completed = new Set();
+    const queue = [];
+    
+    // Initialize operations map and track last execution end time for each process
+    const processLastEndTime = new Map();
+    processes.forEach(p => {
+      operations.set(p.id, '');
+      processLastEndTime.set(p.id, null);
+    });
     
     while (completed.size < numProcesses) {
-      // Find all processes that have arrived and are not completed
-      const available = processes.filter(p => p.arrivalTime <= currentTime && !completed.has(p.id));
+      // Add all processes that have arrived to the queue
+      while (processIndex < processes.length && processes[processIndex].arrivalTime <= currentTime) {
+        queue.push(processes[processIndex]);
+        processIndex++;
+      }
       
-      if (available.length === 0) {
-        // No process available, find the next arriving process
-        const nextProcess = processes.find(p => !completed.has(p.id) && p.arrivalTime > currentTime);
-        if (nextProcess) {
-          schedule.push({ processId: -1, timeUnits: nextProcess.arrivalTime - currentTime });
-          currentTime = nextProcess.arrivalTime;
+      if (queue.length === 0) {
+        // No process in queue, jump to next arrival time
+        if (processIndex < processes.length) {
+          const nextArrival = processes[processIndex].arrivalTime;
+          schedule.push({ processId: -1, timeUnits: nextArrival - currentTime });
+          currentTime = nextArrival;
         }
+        continue;
+      }
+      
+      // Select process with shortest remaining time
+      const selectedProcess = queue.reduce((min, p) => 
+        p.remainingTime < min.remainingTime ? p : min
+      );
+      
+      // Execute for 1 unit of time
+      const timeToExecute = 1;
+      
+      // Add schedule entry, combining with previous if same process
+      if (schedule.length > 0 && schedule[schedule.length - 1].processId === selectedProcess.id) {
+        // Combine with last entry
+        schedule[schedule.length - 1].timeUnits += timeToExecute;
       } else {
-        // Select process with shortest remaining time
-        const selectedProcess = available.reduce((min, p) => 
-          p.remainingTime < min.remainingTime ? p : min
-        );
+        // New entry - record gap operation for this chunk start
+        const chunkStartTime = currentTime;
+        const lastEndTime = processLastEndTime.get(selectedProcess.id);
+        const referenceTime = lastEndTime === null ? selectedProcess.arrivalTime : lastEndTime;
+        const opStr = operations.get(selectedProcess.id);
+        const gapOperation = `${chunkStartTime}-${referenceTime}`;
+        operations.set(selectedProcess.id, opStr ? opStr + '+' + gapOperation : gapOperation);
         
-        // Execute for 1 unit of time (to handle preemption properly)
-        schedule.push({ processId: selectedProcess.id, timeUnits: 1 });
-        selectedProcess.remainingTime--;
-        currentTime++;
+        // Add new schedule entry
+        schedule.push({ processId: selectedProcess.id, timeUnits: timeToExecute });
+      }
+      
+      currentTime += timeToExecute;
+      selectedProcess.remainingTime -= timeToExecute;
+      processLastEndTime.set(selectedProcess.id, currentTime);
+      
+      if (selectedProcess.remainingTime === 0) {
+        // Process completed
+        selectedProcess.completionTime = currentTime;
+        completed.add(selectedProcess.id);
         
-        if (selectedProcess.remainingTime === 0) {
-          // Process completed
-          selectedProcess.completionTime = currentTime;
-          completed.add(selectedProcess.id);
-          
-          // Waiting Time = Completion Time - Arrival Time - Burst Time
-          const waitingTime = selectedProcess.completionTime - selectedProcess.arrivalTime - selectedProcess.burstTime;
-          waitingTimes.set(selectedProcess.id, Math.max(0, waitingTime));
-          totalWaitingTime += Math.max(0, waitingTime);
-          
-          const ops = `${selectedProcess.completionTime - selectedProcess.burstTime}-${selectedProcess.arrivalTime}`;
-          operations.set(selectedProcess.id, ops);
+        // Remove from queue
+        const idx = queue.indexOf(selectedProcess);
+        if (idx > -1) {
+          queue.splice(idx, 1);
         }
+        
+        // Waiting Time = Completion Time - Arrival Time - Burst Time
+        const waitingTime = selectedProcess.completionTime - selectedProcess.arrivalTime - selectedProcess.burstTime;
+        waitingTimes.set(selectedProcess.id, Math.max(0, waitingTime));
+        totalWaitingTime += Math.max(0, waitingTime);
       }
     }
     

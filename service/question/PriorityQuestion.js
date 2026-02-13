@@ -5,26 +5,33 @@ class PriorityQuestion extends Question {
     // Generate a Priority scheduling problem instance
     const numProcesses = Math.floor(Math.random() * 3) + 3;
     const processes = [];
-    const arr = [];
+    // const arr = [];
+    const priorities = []
     const processArrivalTimes = [];
-    
-    for (let i = 0; i <= 6; i++) {
-      arr.push(i);
+    for (let i = 1; i <= numProcesses; i++) {
+      priorities.push(i);
     }
+    // for (let i = 0; i <= 6; i++) {
+    //   arr.push(i);
+    // }
     
-    const arrivalTimesSet = new Set(arr);
+    // const arrivalTimesSet = new Set(arr);
+    const prioritiesSet = new Set(priorities);
     for (let i = 0; i < numProcesses; i++) {
-      const randomIndex = Math.floor(Math.random() * arrivalTimesSet.size);
-      const arrivalTime = Array.from(arrivalTimesSet)[randomIndex];
-      processArrivalTimes.push(arrivalTime);
-      arrivalTimesSet.delete(arrivalTime);
+      // const randomIndex = Math.floor(Math.random() * arrivalTimesSet.size);
+      // const arrivalTime = Array.from(arrivalTimesSet)[randomIndex];
+      processArrivalTimes.push(0);
+      // arrivalTimesSet.delete(arrivalTime);
     }
     
     processArrivalTimes.sort((a, b) => a - b);
     for (let i = 0; i < numProcesses; i++) {
       const arrivalTime = processArrivalTimes[i];
       const burstTime = Math.floor(Math.random() * 10) + 2;
-      const priority = Math.floor(Math.random() * 5) + 1; // Priority from 1 to 5 (1 is highest)
+      // const priority = Math.floor(Math.random() * 5) + 1; // Priority from 1 to 5 (1 is highest)
+      const randomIndex = Math.floor(Math.random() * prioritiesSet.size);
+      const priority = Array.from(prioritiesSet)[randomIndex];
+      prioritiesSet.delete(priority)
       processes.push({ id: i + 1, arrivalTime: arrivalTime, burstTime: burstTime, priority: priority });
     }
     
