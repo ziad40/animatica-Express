@@ -85,13 +85,20 @@ class RoundRobinQuestion extends Question {
       const process = queue.shift();
       const timeToExecute = Math.min(timeQuantum, process.remainingTime);
       
-      schedule.push({ processId: process.id, timeUnits: timeToExecute });
-      
-      // Calculate operations: store waiting gaps as start-end pairs
-      const lastTimeReference = process.lastExecutionEndTime === null ? process.arrivalTime : process.lastExecutionEndTime;
-      const opStr = operations.get(process.id);
-      const gapOperation = `${currentTime}-${lastTimeReference}`;
-      operations.set(process.id, opStr ? opStr + '+' + gapOperation : gapOperation);
+      // Add schedule entry, merging with previous if same process
+      if (schedule.length > 0 && schedule[schedule.length - 1].processId === process.id) {
+        // Merge with last entry - no operation recorded
+        schedule[schedule.length - 1].timeUnits += timeToExecute;
+      } else {
+        // New chunk starts - record operation gap
+        const lastTimeReference = process.lastExecutionEndTime === null ? process.arrivalTime : process.lastExecutionEndTime;
+        const opStr = operations.get(process.id);
+        const gapOperation = `${currentTime}-${lastTimeReference}`;
+        operations.set(process.id, opStr ? opStr + '+' + gapOperation : gapOperation);
+        
+        // Add new schedule entry
+        schedule.push({ processId: process.id, timeUnits: timeToExecute });
+      }
       
       currentTime += timeToExecute;
       process.remainingTime -= timeToExecute;
