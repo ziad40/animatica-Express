@@ -4,7 +4,7 @@ const QuestionSchema = new mongoose.Schema({
     type: {
         type: String,
         required: true,
-        enum: ["fcfs"]
+        enum: ["fcfs", "sjf", "priority", "round-robin", "roundrobin", "srtf"]
     },
     question: {
         type: mongoose.Schema.Types.Mixed,
