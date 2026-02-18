@@ -85,27 +85,31 @@ class RoundRobinQuestion extends Question {
       const process = queue.shift();
       const timeToExecute = Math.min(timeQuantum, process.remainingTime);
       
-      // Add schedule entry, merging with previous if same process
-      if (schedule.length > 0 && schedule[schedule.length - 1].processId === process.id) {
-        // Merge with last entry - no operation recorded
-        schedule[schedule.length - 1].timeUnits += timeToExecute;
-      } else {
-        // New chunk starts - record operation gap
-        const lastTimeReference = process.lastExecutionEndTime === null ? process.arrivalTime : process.lastExecutionEndTime;
-        const opStr = operations.get(process.id);
-        const gapOperation = `${currentTime}-${lastTimeReference}`;
-        operations.set(process.id, opStr ? opStr + '+' + gapOperation : gapOperation);
-        
-        // Add new schedule entry
-        schedule.push({ processId: process.id, timeUnits: timeToExecute });
-      }
+      // Record operation gap
+      const lastTimeReference = process.lastExecutionEndTime === null ? process.arrivalTime : process.lastExecutionEndTime;
+      const opStr = operations.get(process.id);
+      const gapOperation = `${currentTime}-${lastTimeReference}`;
+      operations.set(process.id, opStr ? opStr + '+' + gapOperation : gapOperation);
+      
+      // Add new schedule entry (each quantum is a single schedule, no merging)
+      schedule.push({ processId: process.id, timeUnits: timeToExecute });
       
       currentTime += timeToExecute;
       process.remainingTime -= timeToExecute;
       process.lastExecutionEndTime = currentTime;
       
       if (process.remainingTime > 0) {
-        // Process not completed, add back to queue
+        // Process not completed: add new arrivals in order, then current process to back
+        const newArrivals = [];
+        while (processIndex < processes.length && processes[processIndex].arrivalTime <= currentTime) {
+          newArrivals.push(processes[processIndex]);
+          processIndex++;
+        }
+        
+        // Push new arrivals to queue (maintaining arrival order)
+        queue.push(...newArrivals);
+        
+        // Push current process to back of queue after all new arrivals
         queue.push(process);
       } else {
         // Process completed
