@@ -83,7 +83,18 @@ class RoundRobinQuestion extends Question {
       
       // Execute process from queue
       const process = queue.shift();
-      const timeToExecute = Math.min(timeQuantum, process.remainingTime);
+      
+      // PREEMPTIVE: Check if another process arrives before quantum completes
+      let timeToExecute = timeQuantum;
+      if (processIndex < processes.length) {
+        const nextArrivalTime = processes[processIndex].arrivalTime;
+        if (nextArrivalTime < currentTime + timeQuantum) {
+          // Preempt: new process arrives before quantum ends
+          timeToExecute = nextArrivalTime - currentTime;
+        }
+      }
+      
+      timeToExecute = Math.min(timeToExecute, process.remainingTime);
       
       // Record operation gap
       const lastTimeReference = process.lastExecutionEndTime === null ? process.arrivalTime : process.lastExecutionEndTime;
@@ -98,18 +109,16 @@ class RoundRobinQuestion extends Question {
       process.remainingTime -= timeToExecute;
       process.lastExecutionEndTime = currentTime;
       
+      // Add newly arrived processes at the FRONT of queue (priority)
+      const arrivedDuringExecution = [];
+      while (processIndex < processes.length && processes[processIndex].arrivalTime <= currentTime) {
+        arrivedDuringExecution.push(processes[processIndex]);
+        processIndex++;
+      }
+      queue.unshift(...arrivedDuringExecution);
+      
       if (process.remainingTime > 0) {
-        // Process not completed: add new arrivals in order, then current process to back
-        const newArrivals = [];
-        while (processIndex < processes.length && processes[processIndex].arrivalTime <= currentTime) {
-          newArrivals.push(processes[processIndex]);
-          processIndex++;
-        }
-        
-        // Push new arrivals to queue (maintaining arrival order)
-        queue.push(...newArrivals);
-        
-        // Push current process to back of queue after all new arrivals
+        // Process not completed: add to back of queue
         queue.push(process);
       } else {
         // Process completed
