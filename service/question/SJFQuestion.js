@@ -59,9 +59,12 @@ class SJFQuestion extends Question {
         const selectedProcess = available.reduce((min, p) => 
           p.burstTime < min.burstTime ? p : min
         );
-        
-        const waitingTime = currentTime - selectedProcess.arrivalTime;
-        const ops = `${currentTime}-${selectedProcess.arrivalTime}`;
+        // Calculate waiting time for the selected process but use arrival time as client requested, not the actual waiting time
+        // const waitingTime = currentTime - selectedProcess.arrivalTime;
+        const waitingTime = selectedProcess.arrivalTime;
+        // const ops = `${currentTime}-${selectedProcess.arrivalTime}`;
+        const ops = selectedProcess.arrivalTime;
+
         totalWaitingTime += waitingTime;
         
         schedule.push({ processId: selectedProcess.id, timeUnits: selectedProcess.burstTime });
