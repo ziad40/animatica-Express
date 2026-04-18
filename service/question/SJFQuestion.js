@@ -61,9 +61,9 @@ class SJFQuestion extends Question {
         );
         // Calculate waiting time for the selected process but use arrival time as client requested, not the actual waiting time
         // const waitingTime = currentTime - selectedProcess.arrivalTime;
-        const waitingTime = selectedProcess.arrivalTime;
+        const waitingTime = currentTime
         // const ops = `${currentTime}-${selectedProcess.arrivalTime}`;
-        const ops = selectedProcess.arrivalTime;
+        const ops = currentTime;
 
         totalWaitingTime += waitingTime;
         
