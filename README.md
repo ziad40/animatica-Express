@@ -49,6 +49,30 @@ erDiagram
     }
 ```
 
+
+### Sequence Diagram (Problem Submission & Validation)
+
+```mermaid
+sequenceDiagram
+  participant Student
+  participant Frontend
+  participant AuthController
+  participant ProblemController
+  participant QuestionService
+  participant DB
+
+  Student->>Frontend: Submit solution
+  Frontend->>AuthController: Verify JWT/session
+  AuthController-->>Frontend: Auth success/fail
+  Frontend->>ProblemController: POST /api/problem/submit
+  ProblemController->>QuestionService: validateSolution()
+  QuestionService->>DB: Fetch question & correct solution
+  QuestionService-->>ProblemController: Validation result, score
+  ProblemController->>DB: Save Attempt
+  ProblemController-->>Frontend: Response (score, feedback)
+  Frontend-->>Student: Show result
+```
+
 ### Class Diagram
 
 ```mermaid
