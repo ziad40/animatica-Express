@@ -4,6 +4,88 @@ A robust Express.js backend API for an educational platform focused on teaching 
 
 **Frontend Repository**: [animatica](https://github.com/ziad40/animatica) | **GitHub Profile**: [ziad40](https://github.com/ziad40)
 
+
+## Diagrams
+
+### Entity-Relationship (ER) Diagram
+
+```mermaid
+erDiagram
+    USER ||--o{ ATTEMPT : has
+    USER ||--o{ CONVERSATION : has
+    QUESTION ||--o{ ATTEMPT : has
+    QUESTION ||--o{ CONVERSATION : has
+
+    USER {
+      string _id
+      string fullName
+      string name
+      string email
+      string password
+      string role
+    }
+    QUESTION {
+      string _id
+      string type
+      mixed question
+      mixed solution
+      date createdAt
+    }
+    ATTEMPT {
+      string _id
+      objectId userId
+      objectId question
+      mixed trialAnswer
+      mixed scoreCal
+      number score
+      number time
+      date createdAt
+    }
+    CONVERSATION {
+      string _id
+      objectId userId
+      objectId question
+      array messages
+    }
+```
+
+### Class Diagram
+
+```mermaid
+classDiagram
+    class User {
+      +String fullName
+      +String name
+      +String email
+      +String password
+      +String role
+    }
+    class Question {
+      +String type
+      +Mixed question
+      +Mixed solution
+      +Date createdAt
+    }
+    class Attempt {
+      +ObjectId userId
+      +ObjectId question
+      +Mixed trialAnswer
+      +Mixed scoreCal
+      +Number score
+      +Number time
+      +Date createdAt
+    }
+    class Conversation {
+      +ObjectId userId
+      +ObjectId question
+      +Array messages
+    }
+    User "1" -- "many" Attempt
+    User "1" -- "many" Conversation
+    Question "1" -- "many" Attempt
+    Question "1" -- "many" Conversation
+```
+
 ## 📋 Table of Contents
 
 - [Project Overview](#project-overview)
